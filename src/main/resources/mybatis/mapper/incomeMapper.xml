@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.nxlexiaoyao.sales.dao.IncomeDao">
+
+
+  <select id="save" parameterType="income">
+  	insert into income(income_content,income_amount,member_id)values(#{incomeContent},#{incomeAmount},#{memberId});
+  </select>
+  
+  <select id="incomes" resultType="income">
+  select * from income order by insert_time desc;
+  </select>
+  
+  
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.nxlexiaoyao.sales.dao.ManagerDao">
+  <insert id="save" parameterType="manager">
+    INSERT INTO manager(name,account,password,rights,salt)VALUES (#{name},#{account},#{password},#{rights},#{salt});
+  </insert>
+	
+	
+	
+	
+	<select id="selectAll" resultType="manager">
+		SELECT * FROM manager;
+	</select>
+	
+	
+	<delete id="delById" parameterType="string">
+		delete from manager where id = #{managerId}
+	</delete>
+	
+	<select id="selectByAccount" parameterType="string" resultType="manager">
+		select * from manager where account= #{account}
+	</select>
+</mapper>

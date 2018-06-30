@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.nxlexiaoyao.sales.dao.SaleFormDao">
+	<insert id="save" parameterType="saleForm">
+		INSERT INTO sale_form(
+		<if test="id != null">
+			id,
+		</if>
+		rule_id,referee_id,name,mobile,bank_name,address,bank_account,id_number,form_type
+		)VALUES
+		(
+		<if test="id != null">
+			#{id},
+		</if>
+		#{ruleId},#{refereeId},#{name},#{mobile},#{bankName},#{address},#{bankAccount},#{idNumber},#{formType}
+
+		);
+	</insert>
+
+
+
+
+	<select id="select" parameterType="saleForm"
+		resultType="saleForm">
+		SELECT f.*,r.rule_name,m.name as member_name FROM sale_form f LEFT
+		JOIN member m ON f.referee_id = m.id
+
+		<if test="id != null">
+			AND f.id = #{id}
+		</if>
+		LEFT JOIN sale_rule r ON f.rule_id = r.id
+		<where>
+			<if test="verifyStatus != null">
+				f.verify_status = #{verifyStatus}
+			</if>
+		</where>
+
+		ORDER BY f.insert_time DESC
+		<if test="limit != null">
+			limit #{limit}
+		</if>
+		<if test="offset != null">
+			offset #{offset}
+		</if>
+	</select>
+
+
+	<update id="verifyForm" parameterType="saleForm">
+		UPDATE sale_form SET
+		verify_status = 'Y',
+		member_id = #{memberId},
+		update_time = localtimestamp(0),
+		insert_no = (SELECT coalesce(max(insert_no) + 1,0) FROM sale_form where rule_id = (select rule_id from sale_form where id = #{id})),
+		current_no = (SELECT coalesce(max(current_no) + 1,1) FROM sale_form where rule_id = (select rule_id from sale_form where id = #{id}))
+		WHERE id = #{id};
+	</update>
+
+
+	<select id="selectAll" resultType="saleForm">
+		SELECT * FROM sale_form where rule_id = #{ruleId};
+	</select>
+
+	<select id="selectLineMenu" resultType="lineMenuVo">
+		SELECT r.id AS rule_id,r.rule_name,count(f.*) total_form,count(f.*) *
+		r.form_price AS total_amount FROM sale_rule r
+		LEFT JOIN sale_form f ON r.id = f.rule_id AND f.is_out = 'N' AND
+		verify_status = 'Y' GROUP BY r.id;
+	</select>
+
+	<select id="selectLineList" resultType="saleForm"
+		parameterType="saleForm">
+		SELECT
+		f1.id,
+		f1.rule_id,
+		f1.member_id,
+		f1.referee_id,
+		f1.insert_time,
+		f1.verify_status,
+		f1.insert_no,
+		f1.current_no,
+		f1.is_out,
+		f1.mobile,
+		f1.bank_name,
+		f1.id_number,
+		f1.address,
+		f1.bank_account,
+		f1.name,
+		f1.update_time,
+		coalesce(m.name,'系统后台报单',m.name||' APP报单') as form_type,
+		f1.leader_first,
+		f1.leader_second,
+		f1.leader_third,
+		f1.common_first,
+		f1.common_second,
+		f1.common_third,
+		f1.noshare_first,
+		f1.noshare_second,
+		f1.noshare_third,
+		f1.referee_id upper_name,
+		f1.total_refere_count,
+		count(f3.*) refereeCount
+		FROM sale_form f1
+		left JOIN member m ON f1.form_type = m.id
+		LEFT JOIN sale_form f3 ON f1.name = f3.referee_id
+				and f1.verify_status = f3.verify_status
+				and f1.is_out = f3.is_out
+				and f1.rule_id = f3.rule_id		
+		<where>
+			<if test="verifyStatus != null">
+				f1.verify_status = #{verifyStatus}
+			</if>
+			<if test="isOut != null">
+				and f1.is_out = #{isOut}
+			</if>
+			<if test="id != null">
+				and f1.id = #{id}
+			</if>
+			<if test="ruleId != null">
+				and f1.rule_id = #{ruleId}
+			</if>
+		</where>
+		GROUP BY f1.id,m.name
+		ORDER BY f1.insert_no
+		<if test="limit != null">
+			limit #{limit}
+		</if>
+		<if test="offset != null">
+			offset #{offset}
+		</if>
+		;
+
+	</select>
+
+
+
+	<select id="selectByRefereeId" resultType="saleForm"
+		parameterType="string">
+		WITH RECURSIVE r AS (
+		SELECT * FROM sale_form WHERE is_out='N' AND verify_status = 'Y' AND
+		referee_id = #{refereeId} and rule_id = #{ruleId}
+		
+		UNION ALL
+
+		SELECT f.* FROM sale_form f INNER JOIN r ON f.referee_id = r.name and f.rule_id = r.rule_id
+		and f.verify_status = r.verify_status and f.is_out = r.is_out
+		)
+		SELECT * FROM r;
+	</select>
+	
+	<select id="selectByRefereeIdPlus" resultType="saleForm"
+		parameterType="string">
+		SELECT * FROM sale_form WHERE is_out='N' AND verify_status = 'Y' AND
+		referee_id = #{refereeId} and rule_id = #{ruleId};
+	</select>
+	
+	
+	<select id="selectAllTree" resultType="saleForm"
+		parameterType="string">
+		SELECT * FROM sale_form WHERE verify_status = 'Y' AND rule_id = #{ruleId};
+	</select>
+
+
+	<select id="selectOutForm" resultType="saleForm"
+		parameterType="string">
+		SELECT * FROM sale_form WHERE verify_status = 'Y' AND is_out = 'N' AND
+		rule_id = #{ruleId} ORDER BY current_no LIMIT 1;
+	</select>
+
+
+
+	<select id="selectLastByRuleIdAndMemberId" resultType="saleForm"
+		parameterType="string">
+		select * from sale_form where verify_status = 'Y' and is_out = 'N' and
+		rule_id = #{ruleId} and member_id = #{memberId} order by insert_no
+		limit 1;
+	</select>
+
+	<select id="selectOnlineAll" resultType="saleForm">
+		SELECT * FROM sale_form WHERE verify_status = 'Y' AND is_out = 'N' and rule_id = #{ruleId};
+	</select>
+
+
+	<update id="updateTotalRefereeCount"
+		parameterType="java.util.List">
+		<foreach collection="list" item="form">
+			UPDATE sale_form
+			<set>
+				total_refere_count = #{form.totalRefereCount}
+			</set>
+			<where>
+				id = #{form.id}
+			</where>
+			;
+		</foreach>
+	</update>
+
+
+	<update id="regDingbo" parameterType="saleForm">
+		update sale_form
+		<set>
+			<if test="leaderFirst != 'N'.toString()">leader_first = #{leaderFirst}</if>
+			<if test="leaderSecond != 'N'.toString()">leader_second = #{leaderSecond}</if>
+			<if test="leaderThird != 'N'.toString()">leader_third = #{leaderThird}</if>
+			<if test="commonFirst != 'N'.toString()">common_first = #{commonFirst}</if>
+			<if test="commonSecond != 'N'.toString()">common_second = #{commonSecond}</if>
+			<if test="commonThird != 'N'.toString()">common_third = #{commonThird}</if>
+			<if test="noshareFirst != 'N'.toString()">noshare_first = #{noshareFirst}</if>
+			<if test="noshareSecond != 'N'.toString()">noshare_second = #{noshareSecond}</if>
+			<if test="noshareThird != 'N'.toString()">noshare_third = #{noshareThird}</if>
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	
+	<select id="selectById" parameterType="string" resultType="saleForm">
+		select * from sale_form where id= #{id};
+	</select>
+	
+	<update id="out" parameterType="saleForm">
+		update sale_form
+		<set>
+			is_out = 'Y',
+			update_time = localtimestamp(0)
+		</set>
+		<where>
+			id = #{id}
+		</where>
+		;
+		
+		update sale_form
+		
+		<set>
+			current_no = current_no + 1
+		</set>
+		<where>
+			verify_status='Y' and is_out= 'N' and rule_id = #{ruleId}
+		</where>
+		;
+	</update>
+	
+	<select id="selectByIds" parameterType="java.util.List" resultType="saleForm">
+		select * from sale_form where id in
+		<foreach collection="ids" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+		order by insert_time;
+	</select>
+	
+	<delete id="delById" parameterType="string">
+		delete from sale_form where id=#{id};
+	</delete>
+	<update id="updateInsertNoByNo" parameterType="saleForm">
+		update sale_form set insert_no = insert_no -1,current_no = current_no -1
+		where insert_no > #{insertNo} and rule_id = #{ruleId} and verify_status = 'Y' and is_out = 'N'
+	</update>
+	
+	<update id="increaseRefereeTotal" parameterType="java.util.List">
+		update sale_form set total_refere_count = total_refere_count + 1 where id in
+		<foreach collection="list" item="form" open="(" close=")" separator=",">
+			#{form.id}
+		</foreach>
+	</update>
+	
+	<update id="increaseRefereeTotalSelf" parameterType="saleForm">
+		update sale_form set total_refere_count = #{totalRefereCount}
+		where id = #{id} ;
+	</update>
+	
+	<update id="decreaseRefereeTotal" parameterType="saleForm">
+		update sale_form set total_refere_count = case when total_refere_count = 0 then 0 else total_refere_count - 1 end where id in
+		<foreach collection="list" item="form" open="(" close=")" separator=",">
+			#{form.id}
+		</foreach>
+	</update>
+	
+	<select id="relationsUp" resultType="saleForm" parameterType="saleForm">
+		WITH RECURSIVE r AS (
+		SELECT f1.* FROM sale_form f1 WHERE f1.is_out='N' AND f1.verify_status = 'Y' AND
+		f1.name = #{refereeId} and f1.rule_id = #{ruleId}
+		
+		UNION ALL
+		
+		SELECT f2.* FROM sale_form f2 INNER JOIN r ON f2.name = r.referee_id AND f2.is_out = r.is_out and f2.verify_status = r.verify_status
+		
+		and f2.rule_id = r.rule_id
+		)
+		SELECT id FROM r;
+	</select>
+	
+	<select id="relationsDown" resultType="saleForm" parameterType="saleForm">
+		WITH RECURSIVE r AS (
+		SELECT f1.* FROM sale_form f1 WHERE f1.is_out='N' AND f1.verify_status = 'Y' AND
+		f1.referee_id = #{name} and f1.rule_id = #{ruleId}
+		
+		UNION ALL
+		
+		SELECT f2.* FROM sale_form f2 INNER JOIN r ON f2.referee_id = r.name AND f2.is_out = r.is_out and f2.verify_status = r.verify_status
+		and f2.rule_id = r.rule_id
+		)
+		SELECT id FROM r;
+	</select>
+</mapper>

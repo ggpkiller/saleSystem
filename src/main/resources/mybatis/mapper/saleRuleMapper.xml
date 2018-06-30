@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.nxlexiaoyao.sales.dao.SaleRuleDao">
+	<insert id="save" parameterType="saleRule">
+		INSERT INTO sale_rule
+		(
+		rule_name,
+		out_number,
+		rebate,
+		form_price,
+		share_referee,
+		share_rebate,
+		share_under_number,
+		<!-- common_first_referee,
+		common_first_rank,
+		common_first_rebate,
+		common_second_referee,
+		common_second_rank,
+		common_second_rebate,
+		common_third_referee,
+		common_third_rebate,
+		common_third_rank, -->
+		leader_referee,
+		leader_under_number,
+		leader_first_rank,
+		leader_first_rebate,
+		leader_second_rank,
+		leader_second_rebate,
+		leader_third_rank,
+		leader_third_rebate,
+		noshare_first_rank,
+		noshare_first_rebate,
+		noshare_second_rank,
+		noshare_second_rebate,
+		noshare_third_rank,
+		noshare_third_rebate
+		)
+		VALUES
+		(
+		#{ruleName},
+		#{outNumber},
+		#{rebate},
+		#{formPrice},
+		#{shareReferee},
+		#{shareRebate},
+		#{shareUnderNumber},
+		<!-- #{commonFirstReferee},
+		#{commonFirstRank},
+		#{commonFirstRebate},
+		#{commonSecondReferee},
+		#{commonSecondRank},
+		#{commonSecondRebate},
+		#{commonThirdReferee},
+		#{commonThirdRank},
+		#{commonThirdRebate}, -->
+		#{leaderReferee},
+		#{leaderUnderNumber},
+		#{leaderFirstRank},
+		#{leaderFirstRebate},
+		#{leaderSecondRank},
+		#{leaderSecondRebate},
+		#{leaderThirdRank},
+		#{leaderThirdRebate},
+		#{noshareFirstRank},
+		#{noshareFirstRebate},
+		#{noshareSecondRank},
+		#{noshareSecondRebate},
+		#{noshareThirdRank},
+		#{noshareThirdRebate}
+
+		)
+	</insert>
+
+
+	<update id="updateAll" parameterType="saleRule">
+		update sale_rule
+		<set>
+			rule_name = #{ruleName},
+			out_number = #{outNumber},
+			rebate = #{rebate},
+			form_price = #{formPrice},
+			share_referee = #{shareReferee},
+			share_rebate = #{shareRebate},
+			share_under_number = #{shareUnderNumber},
+			<!-- common_first_referee = #{commonFirstReferee},
+			common_first_rank = #{commonFirstRank},
+			common_first_rebate = #{commonFirstRebate},
+			common_second_referee = #{commonSecondReferee},
+			common_second_rank = #{commonSecondRank},
+			common_second_rebate = #{commonSecondRebate},
+			common_third_referee = #{commonThirdReferee},
+			common_third_rebate = #{commonThirdRank},
+			common_third_rank = #{commonThirdRebate}, -->
+			leader_referee = #{leaderReferee},
+			leader_under_number = #{leaderUnderNumber},
+			leader_first_rank = #{leaderFirstRank},
+			leader_first_rebate = #{leaderFirstRebate},
+			leader_second_rank = #{leaderSecondRank},
+			leader_second_rebate = #{leaderSecondRebate},
+			leader_third_rank = #{leaderThirdRank},
+			leader_third_rebate = #{leaderThirdRebate},
+			noshare_first_rank = #{noshareFirstRank},
+			noshare_first_rebate = #{noshareFirstRebate},
+			noshare_second_rank = #{noshareSecondRank},
+			noshare_second_rebate = #{noshareSecondRebate},
+			noshare_third_rank = #{noshareThirdRank},
+			noshare_third_rebate = #{noshareThirdRebate}
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="selectAll" resultType="saleRule">
+		SELECT * FROM sale_rule ORDER BY insert_time;
+	</select>
+
+
+	<select id="selectById" resultType="saleRule">
+		SELECT * FROM sale_rule WHERE id = #{id};
+	</select>
+
+	<delete id="del" parameterType="string">
+		DELETE FROM sale_rule WHERE id = #{id}
+	</delete>
+
+
+	<select id="queryByMemberId" parameterType="string"
+		resultType="queueVo">
+		SELECT "count"(*) AS has,"rule".rule_name AS queue_name,"rule".out_number AS
+		capacity FROM sale_line line INNER JOIN sale_rule rule ON line.rule_id
+		= "rule".id WHERE rule_id IN(
+		SELECT sl.rule_id FROM sale_line sl INNER JOIN member m ON sl.member_id =
+		m.id AND sl.member_id = #{memberId} AND sl.line_status = 'line')
+		GROUP BY "rule".id ORDER BY "rule".insert_time
+	</select>
+</mapper>

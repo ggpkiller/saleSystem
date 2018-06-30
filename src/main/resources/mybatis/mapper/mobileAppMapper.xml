@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.nxlexiaoyao.sales.dao.MobileAppDao">
+  <insert id="save" parameterType="mobileApp">
+    INSERT INTO mobile_app(url,introduce,force_status,version)VALUES (#{url},#{introduce},#{forceStatus},#{version})
+  </insert>
+
+  <select id="getLastMobileApp" resultType="mobileApp">
+    SELECT * FROM mobile_app ORDER BY version DESC limit 1;
+  </select>
+  
+  <delete id="delAll">
+  	delete from mobile_app;
+  </delete>
+</mapper>
