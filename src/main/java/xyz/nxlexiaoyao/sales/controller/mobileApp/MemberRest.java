@@ -125,7 +125,7 @@ public class MemberRest extends BaseRest {
         if(parent == null) {
         	return success(null);
         }
-        int refereeCount = saleFormService.countReferee(parent.getName(),ruleId);
+        
         List<SaleForm> saleFormChildren = saleFormDao.selectByRefereeIdPlus(parent.getName(),ruleId);
         
         
@@ -134,14 +134,13 @@ public class MemberRest extends BaseRest {
         	TeamVo tv = new TeamVo();
         	String childMemberId = child.getId();
         	String childName = child.getName();
-        	int childRefereeCount = saleFormService.countReferee(childName,ruleId);
         	tv.setMemberId(childMemberId);
         	tv.setMemberName(childName);
-        	tv.setRefereeCount(childRefereeCount);
+        	tv.setRefereeCount(child.getTotalRefereCount());
         	children.add(tv);
         });
         
-        teamVo.setRefereeCount(refereeCount);
+        teamVo.setRefereeCount(parent.getTotalRefereCount());
         teamVo.setMemberId(parent.getId());
         teamVo.setMemberName(parent.getName());
         teamVo.setRefereeName(parent.getRefereeId());
