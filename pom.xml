@@ -86,24 +86,24 @@
         </dependency>
 
         <!-- 日志接口 -->
-        <!-- <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
-        </dependency> -->
+        </dependency>
         <!-- log4j2  -->
 
-        <!-- <dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
-        </dependency> -->
+        </dependency>
         <!--对slf4j接口的实现-->
-        <!-- <dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
-        </dependency> -->
+        </dependency>
 
         <dependency>
             <groupId>javax.validation</groupId>

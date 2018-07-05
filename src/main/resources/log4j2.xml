@@ -33,8 +33,8 @@
 
         <logger name="org.springframework" level="INFO"></logger>
         <logger name="org.mybatis" level="INFO"></logger>
-        <root level="DEBUG">
-            <appender-ref ref="Console"/>
+        <root level="INFO">
+            <!-- <appender-ref ref="Console"/> -->
             <appender-ref ref="Error"/>
             <appender-ref ref="RollingFile"/>
         </root>

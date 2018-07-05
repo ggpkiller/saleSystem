@@ -140,20 +140,6 @@ public class SaleFormController {
 			saleForm.setMemberId(newForm.getMemberId());
 		}
 		saleFormDao.verifyForm(saleForm);
-		//找到他的上级，上上级等，向上递归
-		List<SaleForm> relations = saleFormDao.relationsUp(saleForm);
-		//关系人每人递增1个总推荐人
-		saleFormDao.increaseRefereeTotal(relations);
-		//找到他的下级、下下级、向下递归
-		List<SaleForm> relationDown = saleFormDao.relationsDown(saleForm);
-		int totalRefereeCount = 0;
-		if(relationDown != null) {
-			totalRefereeCount = relationDown.size();
-		}
-		saleForm.setTotalRefereCount(totalRefereeCount);
-		//更新自己的总推荐人
-		saleFormDao.increaseRefereeTotalSelf(saleForm);
-		
 		model.addAttribute("result", result);
 		return "common/result";
 	}
@@ -187,7 +173,7 @@ public class SaleFormController {
 				member.setMobile(mobile);
 				member.setAccount(mobile);
 				member.setIdNumber(form.getIdNumber());
-				member.setRefereeId(form.getMemberId());
+//				member.setRefereeId(form.getMemberId());
 				member.setBankName(form.getBankName());
 				member.setBankAccount(form.getBankAccount());
 				member.setAddress(form.getAddress());
